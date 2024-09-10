@@ -2,6 +2,7 @@
 #include <unity.h>
 #include <avr/sleep.h>
 
+void test_fast_map_implementation(void);
 void test_fast_map(void) ;
 void test_fast_map_perf(void);
 
@@ -20,6 +21,7 @@ void setup()
 #endif
 
     UNITY_BEGIN(); 
+    test_fast_map_implementation();
     test_fast_map();
     test_fast_map_perf();
     UNITY_END(); 

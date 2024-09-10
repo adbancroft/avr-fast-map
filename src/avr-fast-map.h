@@ -97,6 +97,7 @@ namespace fast_map_impl {
               // to avoid overflow.
               typename TResult = typename fast_map_impl::widen_integral_t<TCommon>>
     TResult safeMultiply(const T &a, const U &b) {
+        static_assert(type_traits::is_signed<T>::value==type_traits::is_signed<U>::value, "Both types must be signed or unsigned");
         return (TResult)(static_cast<TResult>(a) * static_cast<TResult>(b));
     }
 
@@ -127,7 +128,7 @@ static inline TOut fast_map(TIn in, TIn inMin, TIn inMax, TOut outMin, TOut outM
     /* Float version (if m, yMax, yMin and n were float's)
         int yVal = (m * (yMax - yMin)) / n;
     */
-    // We use unsigned types for performance and code simplicity.
+    // We use unsigned types for performance and to avoid integer overflow.
     typedef typename type_traits::make_unsigned_t<TIn> in_unsigned_t;
     typedef typename type_traits::make_unsigned_t<TOut> out_unsigned_t;
 
@@ -135,7 +136,7 @@ static inline TOut fast_map(TIn in, TIn inMin, TIn inMax, TOut outMin, TOut outM
     in_unsigned_t inRange = fast_map_impl::absDelta(inMin, inMax);
     out_unsigned_t outRange = fast_map_impl::absDelta(outMin, outMax);
     // fast_div will do the heavy lifting of optimizing integral type widths,
-    // so no impct even if safeMultiply returns a bigger than necessary type
+    // so no impact even if safeMultiply returns a bigger than necessary type
     out_unsigned_t scaled = (out_unsigned_t)fast_div(fast_map_impl::safeMultiply(m, outRange), inRange);
 
     // Since we use unsigned types to avoid under/overflow, we need to adjust for a few cases
