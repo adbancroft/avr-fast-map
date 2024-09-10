@@ -138,15 +138,14 @@ static inline TOut fast_map(TIn in, TIn inMin, TIn inMax, TOut outMin, TOut outM
     // so no impct even if safeMultiply returns a bigger than necessary type
     out_unsigned_t scaled = (out_unsigned_t)fast_div(fast_map_impl::safeMultiply(m, outRange), inRange);
 
-    bool inBelow = (in<inMin);
-    bool inInverted = (inMax<inMin);
-    bool outInverted = (outMax<outMin);
-    if ((inBelow && !inInverted && !outInverted)
-    || (!inBelow && !inInverted && outInverted)
-    || (inBelow && inInverted && outInverted)
-    || (!inBelow && inInverted && !outInverted)
-    )  {
-        return outMin - scaled;     
+    // Since we use unsigned types to avoid under/overflow, we need to adjust for a few cases
+    // where the result should be less than outMin
+    const bool inLowerThanInMin = (in<inMin);
+    const bool inRangeInverted = (inMax<inMin);
+    const bool inOpposite = inLowerThanInMin!=inRangeInverted;
+    const bool outRangeInverted = (outMax<outMin);
+    if (inOpposite!=outRangeInverted) {
+      return outMin - scaled;     
     }
     return outMin + scaled;    
 }
