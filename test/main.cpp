@@ -12,9 +12,11 @@ void setup()
 
     // NOTE!!! Wait for >2 secs
     // if board doesn't support software reset via Serial.DTR/RTS
-    // delay(2000);
+#if !defined(SIMULATOR)
+    delay(2000);
+#endif
 
-#if defined(CORE_TEENSY)
+#if !defined(__AVR__)
     // Without this, Teensy 3.5 produces a linker error:
     //  "undefined reference to `_write'""
     Serial.println("");
@@ -26,10 +28,12 @@ void setup()
     test_fast_map_perf();
     UNITY_END(); 
     
+#if defined(SIMULATOR)
     // Tell SimAVR we are done
     cli();
     sleep_enable();
     sleep_cpu();
+#endif
 }
 
 void loop()
