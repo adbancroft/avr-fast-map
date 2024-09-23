@@ -83,9 +83,9 @@ namespace fast_map_impl {
     template <typename T>
     static inline type_traits::make_unsigned_t<T> absDelta(const T &min, const T &max) {
         if (max<min) {
-            return min - max;
+            return (T)(min - max);
         }
-        return max - min;
+        return (T)(max - min);
     }
 
     template <typename T, typename U, 
@@ -132,12 +132,12 @@ static inline TOut fast_map(TIn in, TIn inMin, TIn inMax, TOut outMin, TOut outM
     typedef typename type_traits::make_unsigned_t<TIn> in_unsigned_t;
     typedef typename type_traits::make_unsigned_t<TOut> out_unsigned_t;
 
-    in_unsigned_t m = fast_map_impl::absDelta(inMin, in);
-    in_unsigned_t inRange = fast_map_impl::absDelta(inMin, inMax);
-    out_unsigned_t outRange = fast_map_impl::absDelta(outMin, outMax);
+    const in_unsigned_t m = fast_map_impl::absDelta(inMin, in);
+    const in_unsigned_t inRange = fast_map_impl::absDelta(inMin, inMax);
+    const out_unsigned_t outRange = fast_map_impl::absDelta(outMin, outMax);
     // fast_div will do the heavy lifting of optimizing integral type widths,
     // so no impact even if safeMultiply returns a bigger than necessary type
-    out_unsigned_t scaled = (out_unsigned_t)fast_div(fast_map_impl::safeMultiply(m, outRange), inRange);
+    const out_unsigned_t scaled = (out_unsigned_t)fast_div(fast_map_impl::safeMultiply(m, outRange), inRange);
 
     // Since we use unsigned types to avoid under/overflow, we need to adjust for a few cases
     // where the result should be less than outMin
@@ -146,7 +146,7 @@ static inline TOut fast_map(TIn in, TIn inMin, TIn inMax, TOut outMin, TOut outM
     const bool inOpposite = inLowerThanInMin!=inRangeInverted;
     const bool outRangeInverted = (outMax<outMin);
     if (inOpposite!=outRangeInverted) {
-      return outMin - scaled;     
+      return (TOut)(outMin - scaled);     
     }
-    return outMin + scaled;    
+    return (TOut)(outMin + scaled);    
 }
