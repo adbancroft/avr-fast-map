@@ -1,9 +1,8 @@
 /*
- avr-fast-div example
+ avr-fast-map example
 */
 #include <Arduino.h>
-#include <stdint.h>
-#include "avr-fast-div.h"
+#include <avr-fast-map.h>
 
 void setup() {
   Serial.begin(9600);   //send and receive at 9600 baud  
@@ -11,39 +10,43 @@ void setup() {
 
   Serial.println("Beginning test...");
 
-  const uint32_t divisor = random(2U, UINT16_MAX/2U);
-  const uint32_t dividend = random((uint32_t)UINT16_MAX+1U, (uint32_t)UINT16_MAX*24U);
+  // Randomness here is all about ensuring that the compiler doesn't optimize away the shifts
+  uint32_t seedValue = rand();
+
+  const uint8_t from_min = 2U;
+  const uint8_t from_max = UINT8_MAX-7U;
+  const uint8_t to_min = 11U;
+  const uint8_t to_max = UINT8_MAX/4U*3U;
 
   constexpr uint32_t iterations = 5000;
 
-  // Built in "/" operator
-  uint32_t divCheckSum = 0UL;
-  uint32_t divStartTime = micros();
-  for (uint32_t i = 0U; i < iterations; i++) {
-      // We need the +i & -i to prevent the optimiser making this loop a no-op
-      divCheckSum += (dividend+i) / (divisor+i);
+  // Built in map() function 
+  randomSeed(seedValue);
+  uint32_t mapCheckSum = 0UL;
+  uint32_t mapStartTime = micros();
+  for (uint32_t i = 0; i < iterations; i++) {
+      mapCheckSum += map(random(0, UINT8_MAX), from_min, from_max, to_min, to_max);
   }
-  uint32_t divEndTime = micros();
-  uint32_t divDuration = divEndTime-divStartTime;
+  uint32_t mapEndTime = micros();
+  uint32_t mapDuration = mapEndTime-mapStartTime;
 
-  // fast_div()
-  uint32_t fastdivCheckSum = 0UL;
-  uint32_t fastdivStartTime = micros();
+  // fast_map()
+  randomSeed(seedValue);
+  uint32_t fastmapCheckSum = 0UL;
+  uint32_t fastmapStartTime = micros();
   for (uint32_t i = 0U; i < iterations; i++) {
-      fastdivCheckSum += fast_div((dividend+i), (divisor+i));
+    fastmapCheckSum += fast_map((uint8_t)random(0, UINT8_MAX), from_min, from_max, to_min, to_max);    
   }
-  uint32_t fastdivEndTime = micros();
-  uint32_t fastdivDuration = fastdivEndTime-fastdivStartTime;
+  uint32_t fastmapEndTime = micros();
+  uint32_t fastmapDuration = fastmapEndTime-fastmapStartTime;
 
   char msg[128];
-  sprintf(msg, "Dividend: %" PRIu32 ", Divisor: %" PRIu32, dividend, divisor);
+  sprintf(msg, "map() Checksum: %" PRIu32 ", fast_map() Checksum: %" PRIu32, mapCheckSum, fastmapCheckSum);
   Serial.println(msg);
-  sprintf(msg, "Div Checksum: %" PRIu32 ", FastDiv Checksum: %" PRIu32, divCheckSum, fastdivCheckSum);
+  sprintf(msg, "map() Duration: %" PRIu32 ", fast_map() Duration: %" PRIu32, mapDuration, fastmapDuration);
   Serial.println(msg);
-  sprintf(msg, "Div Duration: %" PRIu32 ", FastDiv Duration: %" PRIu32, divDuration, fastdivDuration);
-  Serial.println(msg);
-  uint16_t percentDelta = fastdivDuration * 100U / divDuration;
-  sprintf(msg, "fast_div() took %" PRIu16 "%% less time than the division operator", 100-percentDelta);
+  uint16_t percentDelta = (uint16_t)(fastmapDuration * 100U / mapDuration);
+  sprintf(msg, "fast_map() took %" PRIu16 "%% less time than the map() function", 100-percentDelta);
   Serial.println(msg);
 }
 
