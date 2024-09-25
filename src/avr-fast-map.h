@@ -2,11 +2,16 @@
 
 #include <avr-fast-div.h>
 
+#if defined(USE_OPTIMIZED_DIV)
+#include <type_traits.h>
+
 /**
  * @file
  * @brief A faster implementation of the Arduino map() function.
  * 
- * Takes advantage of our optimized unsigned division functions.
+ * Takes advantage of the optimized division functions in avr-fast-div & avoids 
+ * automatic promotion to long (int32_t) (assuming the caller is using the smallest 
+ * integral types possible)
  *
  */
 
@@ -150,3 +155,13 @@ static inline TOut fast_map(TIn in, TIn inMin, TIn inMax, TOut outMin, TOut outM
     }
     return (TOut)(outMin + scaled);    
 }
+#else
+
+#include <Arduino.h>
+
+template <typename TIn, typename TOut>
+static inline TOut fast_map(TIn in, TIn inMin, TIn inMax, TOut outMin, TOut outMax) {
+    return (TOut)map((long)in, (long)inMin, (long)inMax, (long)outMin, (long)outMax);
+}
+
+#endif
