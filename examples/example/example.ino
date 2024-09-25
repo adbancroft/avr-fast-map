@@ -10,7 +10,8 @@ void setup() {
 
   Serial.println("Beginning test...");
 
-  // Randomness here is all about ensuring that the compiler doesn't optimize away the shifts
+  // Randomness here is all about ensuring that the compiler doesn't optimize away the calls
+  // to map()/fast_map(), which it can't do under real world conditions.
   uint32_t seedValue = rand();
 
   const uint8_t from_min = 2U;
