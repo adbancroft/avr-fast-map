@@ -1,0 +1,18 @@
+{
+    "name": "avr-fast-map",
+    "version": "1.0.2",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/adbancroft/avr-fast-map.git"
+      },    
+    "description": "A faster implementation of the Arduino map() function",
+    "keywords": ["performance", "speed", "division", "map", "ranges"],
+    "license" : "LGPL-2.1-or-later",
+    "headers" : ["avr-fast-map.h"],
+    "dependencies": [
+        {
+            "owner": "adbancroft",
+            "name": "avr-fast-div"
+        }
+    ]
+}
