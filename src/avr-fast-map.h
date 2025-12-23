@@ -3,7 +3,6 @@
 #include <avr-fast-div.h>
 
 #if defined(USE_OPTIMIZED_DIV)
-#include <type_traits.h>
 
 /**
  * @file
@@ -23,7 +22,7 @@
 // C++ standard library.
 //
 // Note that these are all compile time operations.
-namespace type_traits {
+namespace afm_type_traits {
     // Limited replacement for std::conditional
     // Primary template for true
     template<bool _Cond, typename _Iftrue, typename _Iffalse>
@@ -86,7 +85,7 @@ namespace fast_map_impl {
     // This is used to handle negative ranges.
     // Equivalent of abs(min-max)
     template <typename T>
-    static inline type_traits::make_unsigned_t<T> absDelta(const T &min, const T &max) {
+    static inline afd_type_traits::make_unsigned_t<T> absDelta(const T &min, const T &max) {
         if (max<min) {
             return (T)(min - max);
         }
@@ -97,12 +96,12 @@ namespace fast_map_impl {
               // Note that std::common_type will not do what we want here, as it will use integer
               // calculation promotion rules. So everything will be "int" at a minimum - our
               // goal is to use the narrowest type possible for performance reasons.
-              typename TCommon = typename type_traits::conditional<(sizeof(T) >= sizeof(U)), T, U>::type,
+              typename TCommon = typename afm_type_traits::conditional<(sizeof(T) >= sizeof(U)), T, U>::type,
               // Widen the common type - this is our intermediate calculation type
               // to avoid overflow.
               typename TResult = typename fast_map_impl::widen_integral_t<TCommon>>
     TResult safeMultiply(const T &a, const U &b) {
-        static_assert(type_traits::is_signed<T>::value==type_traits::is_signed<U>::value, "Both types must be signed or unsigned");
+        static_assert(afd_type_traits::is_signed<T>::value==afd_type_traits::is_signed<U>::value, "Both types must be signed or unsigned");
         return (TResult)(static_cast<TResult>(a) * static_cast<TResult>(b));
     }
 
@@ -134,8 +133,8 @@ static inline TOut fast_map(TIn in, TIn inMin, TIn inMax, TOut outMin, TOut outM
         int yVal = (m * (yMax - yMin)) / n;
     */
     // We use unsigned types for performance and to avoid integer overflow.
-    typedef typename type_traits::make_unsigned_t<TIn> in_unsigned_t;
-    typedef typename type_traits::make_unsigned_t<TOut> out_unsigned_t;
+    typedef typename afd_type_traits::make_unsigned_t<TIn> in_unsigned_t;
+    typedef typename afd_type_traits::make_unsigned_t<TOut> out_unsigned_t;
 
     const in_unsigned_t m = fast_map_impl::absDelta(inMin, in);
     const in_unsigned_t inRange = fast_map_impl::absDelta(inMin, inMax);
